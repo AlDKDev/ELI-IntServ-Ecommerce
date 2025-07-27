@@ -1,0 +1,435 @@
+{
+  "info": {
+    "name": "Product Service Complete API - ELITEC",
+    "description": "Complete API testing for Product Service with all endpoints",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8081",
+      "type": "string"
+    },
+    {
+      "key": "api_version",
+      "value": "v1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Checks",
+      "item": [
+        {
+          "name": "Application Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/actuator/health",
+              "host": ["{{base_url}}"],
+              "path": ["actuator", "health"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is UP', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.status).to.equal('UP');",
+                  "});",
+                  "pm.test('Response time < 2000ms', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Controller Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/products/health",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "products", "health"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Controller status is UP', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.status).to.equal('UP');",
+                  "});",
+                  "pm.test('External API connectivity is UP', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.externalApiConnectivity).to.equal('UP');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Product Operations",
+      "item": [
+        {
+          "name": "Get All Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/products",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "products"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Response is array', function () {",
+                  "    const products = pm.response.json();",
+                  "    pm.expect(products).to.be.an('array');",
+                  "    pm.expect(products.length).to.be.greaterThan(0);",
+                  "});",
+                  "pm.test('Has X-Total-Count header', function () {",
+                  "    pm.expect(pm.response.headers.get('X-Total-Count')).to.exist;",
+                  "});",
+                  "pm.test('Products have required fields', function () {",
+                  "    const products = pm.response.json();",
+                  "    const firstProduct = products[0];",
+                  "    pm.expect(firstProduct).to.have.property('id');",
+                  "    pm.expect(firstProduct).to.have.property('title');",
+                  "    pm.expect(firstProduct).to.have.property('price');",
+                  "    pm.expect(firstProduct).to.have.property('category');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Product By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/products/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "products", "1"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Product ID matches request', function () {",
+                  "    const product = pm.response.json();",
+                  "    pm.expect(product.id).to.equal(1);",
+                  "});",
+                  "pm.test('Has custom headers', function () {",
+                  "    pm.expect(pm.response.headers.get('X-Product-ID')).to.exist;",
+                  "    pm.expect(pm.response.headers.get('X-Product-Category')).to.exist;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Product Safely (Not Found)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/products/safe/999999",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "products", "safe", "999999"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 204 No Content', function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});",
+                  "pm.test('Response body is empty', function () {",
+                  "    pm.expect(pm.response.text()).to.be.empty;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Products With Limit",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/products/limited?limit=3",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "products", "limited"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "3"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Returns limited products', function () {",
+                  "    const products = pm.response.json();",
+                  "    pm.expect(products.length).to.be.at.most(3);",
+                  "});",
+                  "pm.test('Has limit headers', function () {",
+                  "    pm.expect(pm.response.headers.get('X-Requested-Limit')).to.equal('3');",
+                  "    pm.expect(pm.response.headers.get('X-Actual-Count')).to.exist;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Category Operations",
+      "item": [
+        {
+          "name": "Get All Categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/products/categories",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "products", "categories"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Returns categories array', function () {",
+                  "    const categories = pm.response.json();",
+                  "    pm.expect(categories).to.be.an('array');",
+                  "    pm.expect(categories.length).to.be.greaterThan(0);",
+                  "});",
+                  "pm.test('Categories have name property', function () {",
+                  "    const categories = pm.response.json();",
+                  "    categories.forEach(category => {",
+                  "        pm.expect(category).to.have.property('name');",
+                  "    });",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Products By Category",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/products/category/electronics",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "products", "category", "electronics"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('All products belong to electronics', function () {",
+                  "    const products = pm.response.json();",
+                  "    products.forEach(product => {",
+                  "        pm.expect(product.category).to.equal('electronics');",
+                  "    });",
+                  "});",
+                  "pm.test('Has category header', function () {",
+                  "    pm.expect(pm.response.headers.get('X-Category')).to.equal('electronics');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Check Category Exists",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/products/category/electronics/exists",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "products", "category", "electronics", "exists"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Category exists', function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.exists).to.be.true;",
+                  "    pm.expect(response.category).to.equal('electronics');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Statistics",
+      "item": [
+        {
+          "name": "Get Product Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/products/stats",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "products", "stats"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Has required statistics', function () {",
+                  "    const stats = pm.response.json();",
+                  "    pm.expect(stats).to.have.property('totalProducts');",
+                  "    pm.expect(stats).to.have.property('totalCategories');",
+                  "    pm.expect(stats).to.have.property('premiumProducts');",
+                  "    pm.expect(stats).to.have.property('averagePrice');",
+                  "    pm.expect(stats).to.have.property('premiumPercentage');",
+                  "});",
+                  "pm.test('Statistics have valid values', function () {",
+                  "    const stats = pm.response.json();",
+                  "    pm.expect(stats.totalProducts).to.be.a('number');",
+                  "    pm.expect(stats.totalCategories).to.be.a('number');",
+                  "    pm.expect(stats.averagePrice).to.be.a('number');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Error Scenarios",
+      "item": [
+        {
+          "name": "Product Not Found (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/products/999999",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "products", "999999"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 404', function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "pm.test('Error response structure', function () {",
+                  "    const error = pm.response.json();",
+                  "    pm.expect(error).to.have.property('error');",
+                  "    pm.expect(error).to.have.property('message');",
+                  "    pm.expect(error).to.have.property('timestamp');",
+                  "    pm.expect(error.error).to.equal('PRODUCT_NOT_FOUND');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Invalid Product ID (400)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/{{api_version}}/products/invalid-id",
+              "host": ["{{base_url}}"],
+              "path": ["api", "{{api_version}}", "products", "invalid-id"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "pm.test('Invalid parameter error', function () {",
+                  "    const error = pm.response.json();",
+                  "    pm.expect(error.error).to.equal('INVALID_PARAMETER');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

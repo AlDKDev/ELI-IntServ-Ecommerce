@@ -51,6 +51,11 @@ public class RestTemplateConfig {
         RestTemplate restTemplate = new RestTemplate(factory);
 
         logger.info("RestTemplate configurado existosamente con connection pool y timeout");
+
+        restTemplate.getInterceptors().add(new RequestLoggingInterceptor());
+
+        logger.info("RestTemplate configurado exitosamente con interceptors");
+
         return restTemplate;
     }
 }
