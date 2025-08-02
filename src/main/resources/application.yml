@@ -20,6 +20,7 @@ spring:
 external:
     fakestore:
         base-url: https://fakestoreapi.com
+        api-key: "demo-api-key-123"
         timeout:
             connect: 5000
             read: 10000

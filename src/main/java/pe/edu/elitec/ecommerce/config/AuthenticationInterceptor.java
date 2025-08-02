@@ -3,6 +3,7 @@ package pe.edu.elitec.ecommerce.config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -11,7 +12,7 @@ import org.springframework.http.client.ClientHttpResponse;
 import java.io.IOException;
 import java.util.UUID;
 
-
+@Configuration
 public class AuthenticationInterceptor implements ClientHttpRequestInterceptor {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthenticationInterceptor.class);
@@ -78,5 +79,4 @@ public class AuthenticationInterceptor implements ClientHttpRequestInterceptor {
         }
         return apiKey.substring(0,4) + "***" + apiKey.substring(apiKey.length()-4);
     }
-
 }
